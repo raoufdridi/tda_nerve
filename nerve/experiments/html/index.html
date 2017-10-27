@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Nerve Graph</title>
+<link rel="icon" href="/favicon.png">
+<style>
+
+@import url("./style.css");
+
+header,
+footer {
+  color: #555;
+}
+
+a.gist {
+  color: #000;
+}
+
+</style>
+
+<header> 
+<span id="demo" class="date">  </span>
+<script>
+document.getElementById("demo").innerHTML = Date();
+</script>
+</header>
+
+<h1>My Nerve Graph</h1>
+
+
+<iframe src="./graph/index.html" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+
+
+<div class="gist-readme"></div>
+
+<div class="gist-sources"></div>
+
+<script src="./d3.v3.min.js"></script>
+<script src="./highlight.min.js"></script>
+<script>
+
+var gist = {"history":[{"version":"graph"}],"files":{"nerveGraph":{"language":"JSON","type":"application/json","filename":"nerveGraph","size":13204,"sha":"e64a661280b431a0ffec3579e94508174f8b2f26"},"thumbnail.png":{"language":null,"type":"image/png","filename":"thumbnail.png","size":10318,"sha":"0eab8866e65041658e4e28685488feed79a59a24"}},"created_at":"2012-11-12T21:31:44.000Z","updated_at":"2014-12-30T10:41:46.000Z","description":"Force-Directed Graph","owner":{"login":"mbostock"},"id":"./"};
+
+var files = d3.values(gist.files)
+    .sort(function(a, b) { return (b.filename === "index.html") - (a.filename === "index.html") || a.filename.localeCompare(b.filename); });
+
+var readme = d3.selectAll(".gist-readme")
+    .data(files.filter(function(d) { return /^readme\b/i.test(d.filename) && d.language === "Markdown"; }))
+    .each(function(d) {
+      var readme = d3.select(this);
+      d3.text("./graph/" + d.filename, function(error, content) {
+        readme.html(new Showdown.converter().makeHtml(content));
+        readme.selectAll("code").each(function() { hljs.highlightBlock(this); });
+      });
+    });
+
+var source = d3.select(".gist-sources").selectAll(".gist-source")
+    .data(files.filter(function(d) { return !/^readme\b/i.test(d.filename) && d.size < 50000 && text(d.type); }))
+  .enter().append("div")
+    .attr("class", "gist-source");
+
+source.append("h2")
+    .text(function(d) { return d.filename; })
+  .append("a")
+    .attr("name", function(d) { return d.filename; })
+    .attr("href", function(d) { return "#" + d.filename; })
+    .text("#");
+
+source.append("pre").append("code")
+    .attr("class", function(d) { return d.language && (d.language === "JSON" ? "javascript" : d.language.toLowerCase()); })
+    .each(function(d) {
+      var code = d3.select(this);
+      d3.text("./graph/" + (d.filename === "index.html" ? "" : d.filename), function(error, content) {
+        code.text(content);
+        hljs.highlightBlock(code.node());
+      });
+    });
+
+function text(type) {
+  return /(^text\/)|(^application\/(javascript|json)$)|(^image\/svg$)|(\+xml$)/.test(type);
+}
+
+</script>
+
+<script>
+
+
+</script>
+
+
